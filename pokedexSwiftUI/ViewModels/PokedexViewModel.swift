@@ -1,5 +1,15 @@
 import Foundation
 
+struct PokemonDetail: Decodable {
+    struct TypeEntry: Decodable {
+        struct Info: Decodable { let name: String }
+        let type: Info
+    }
+    let id: Int
+    let name: String
+    let types: [TypeEntry]
+}
+
 @MainActor
 class PokedexViewModel: ObservableObject {
     @Published var pokemon: [Pokemon] = []
@@ -9,12 +19,16 @@ class PokedexViewModel: ObservableObject {
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             let list = try JSONDecoder().decode(PokemonList.self, from: data)
-            pokemon = list.results.enumerated().compactMap { index, entry in
-                let parts = entry.url.split(separator: "/")
-                let idString = parts.last ?? "0"
-                let id = Int(idString) ?? index + 1
-                return Pokemon(id: id, name: entry.name.capitalized)
+            var loaded: [Pokemon] = []
+            for entry in list.results {
+                guard let detailURL = URL(string: entry.url) else { continue }
+                let (dData, _) = try await URLSession.shared.data(from: detailURL)
+                let detail = try JSONDecoder().decode(PokemonDetail.self, from: dData)
+                let types = detail.types.map { $0.type.name }
+                let pokemon = Pokemon(id: detail.id, name: detail.name.capitalized, types: types)
+                loaded.append(pokemon)
             }
+            pokemon = loaded.sorted { $0.id < $1.id }
         } catch {
             print("Failed to fetch Pokémon: \(error)")
         }

@@ -1,21 +1,37 @@
-//
-//  ContentView.swift
-//  pokedexSwiftUI
-//
-//  Created by Denis Coder on 6/9/25.
-//
-
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var viewModel = PokedexViewModel()
+    private let columns = [GridItem(.adaptive(minimum: 80))]
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            ScrollView {
+                LazyVGrid(columns: columns, spacing: 16) {
+                    ForEach(viewModel.pokemon) { pokemon in
+                        VStack {
+                            AsyncImage(url: pokemon.imageURL) { image in
+                                image.resizable()
+                                    .aspectRatio(contentMode: .fit)
+                            } placeholder: {
+                                ProgressView()
+                            }
+                            .frame(width: 72, height: 72)
+                            Text(pokemon.name)
+                                .font(.caption)
+                                .lineLimit(1)
+                        }
+                        .padding(4)
+                        .background(RoundedRectangle(cornerRadius: 8).fill(Color(.systemGray6)))
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("Pokédex")
         }
-        .padding()
+        .task {
+            await viewModel.fetchPokemon()
+        }
     }
 }
 

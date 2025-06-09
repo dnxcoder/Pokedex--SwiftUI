@@ -2,50 +2,46 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel = PokedexViewModel()
-    private let columns = [GridItem(.flexible()), GridItem(.flexible())]
 
     private func color(for type: String) -> Color {
         switch type {
-        case "fire": return .red
-        case "water": return .blue
-        case "grass": return .green
-        case "electric": return .yellow
-        case "poison": return .purple
-        case "bug": return .green.opacity(0.7)
-        case "ground": return .brown
-        case "psychic": return .pink
-        case "rock": return .gray
-        case "ghost": return .indigo
-        case "ice": return .cyan
-        case "dragon": return .orange
+        case "fire": return .red.opacity(0.3)
+        case "water": return .blue.opacity(0.3)
+        case "grass": return .green.opacity(0.3)
+        case "electric": return .yellow.opacity(0.3)
+        case "poison": return .purple.opacity(0.3)
+        case "bug": return .green.opacity(0.3)
+        case "ground": return .brown.opacity(0.3)
+        case "psychic": return .pink.opacity(0.3)
+        case "rock": return .gray.opacity(0.3)
+        case "ghost": return .indigo.opacity(0.3)
+        case "ice": return .cyan.opacity(0.3)
+        case "dragon": return .orange.opacity(0.3)
         default: return Color(.systemGray6)
         }
     }
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(viewModel.pokemon) { pokemon in
-                        VStack {
-                            AsyncImage(url: pokemon.imageURL) { image in
-                                image.resizable()
-                                    .aspectRatio(contentMode: .fit)
-                            } placeholder: {
-                                ProgressView()
-                            }
-                            .frame(width: 96, height: 96)
-                            Text(pokemon.name)
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                                .lineLimit(1)
+            List(viewModel.pokemon) { pokemon in
+                NavigationLink(destination: PokemonDetailView(pokemon: pokemon)) {
+                    HStack {
+                        AsyncImage(url: pokemon.imageURL) { image in
+                            image.resizable()
+                                .aspectRatio(contentMode: .fit)
+                        } placeholder: {
+                            ProgressView()
                         }
-                        .padding(8)
-                        .background(RoundedRectangle(cornerRadius: 8).fill(color(for: pokemon.primaryType)))
+                        .frame(width: 96, height: 96)
+                        Text(pokemon.name)
+                            .font(.headline)
+                            .fontWeight(.semibold)
                     }
+                    .padding(8)
+                    .background(RoundedRectangle(cornerRadius: 8).fill(color(for: pokemon.primaryType)))
                 }
-                .padding()
             }
+            .listStyle(.plain)
             .navigationTitle("Pokédex")
         }
         .task {

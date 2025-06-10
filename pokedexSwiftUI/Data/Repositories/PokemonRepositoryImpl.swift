@@ -16,4 +16,8 @@ class PokemonRepositoryImpl: PokemonRepository {
         }
         return list.sorted { $0.id < $1.id }
     }
+
+    func fetchPokemon(id: Int) async throws -> Pokemon {
+        try await service.fetchDetail(id: id)
+    }
 }

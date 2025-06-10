@@ -5,7 +5,7 @@ struct PokemonEntry: Decodable {
     let url: String
 }
 
-struct Pokemon: Identifiable {
+struct Pokemon: Identifiable, Hashable {
     let id: Int
     let name: String
     let types: [String]

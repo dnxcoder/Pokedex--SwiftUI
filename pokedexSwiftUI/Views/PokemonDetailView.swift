@@ -8,13 +8,15 @@ struct PokemonDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                AsyncImage(url: pokemon.imageURL) { image in
-                    image.resizable()
-                        .aspectRatio(contentMode: .fit)
-                } placeholder: {
-                    ProgressView()
+                NavigationLink(destination: PokemonTriviaView(pokemon: pokemon)) {
+                    AsyncImage(url: pokemon.imageURL) { image in
+                        image.resizable()
+                            .aspectRatio(contentMode: .fit)
+                    } placeholder: {
+                        ProgressView()
+                    }
+                    .frame(width: 150, height: 150)
                 }
-                .frame(width: 150, height: 150)
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("ID: \(pokemon.id)")

@@ -25,6 +25,14 @@ struct AppNavigationView: View {
             .tabItem { Label("Types", systemImage: "square.grid.2x2") }
 
             NavigationStack {
+                CarouselView()
+                    .navigationDestination(for: Pokemon.self) { pokemon in
+                        PokemonDetailView(pokemon: pokemon)
+                    }
+            }
+            .tabItem { Label("Carousel", systemImage: "rectangle.fill.on.rectangle.fill") }
+
+            NavigationStack {
                 AboutView()
             }
             .tabItem { Label("About", systemImage: "info.circle") }

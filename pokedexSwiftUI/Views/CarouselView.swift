@@ -19,28 +19,21 @@ struct CarouselView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: cardSpacing) {
                         ForEach(viewModel.pokemon) { pokemon in
-                            GeometryReader { geo in
-                                let frame = geo.frame(in: .global)
-                                let distance = abs(frame.midX - outer.frame(in: .global).midX)
-                                let progress = min(distance / outer.size.width, 1)
-                                let offsetY = progress * 200
-                                let scale = 1 - progress * 0.2
-
-                                NavigationLink(value: pokemon) {
-                                    CarouselCardView(pokemon: pokemon)
-                                        .offset(y: offsetY)
-                                        .scaleEffect(scale)
-                                        .opacity(1 - progress * 0.5)
-                                }
-                                .buttonStyle(.plain)
-                            }
+                            CarouselCardContainer(
+                                pokemon: pokemon,
+                                outerCenterX: outer.frame(in: .global).midX,
+                                cardWidth: cardWidth
+                            )
                             .frame(width: cardWidth, height: 350)
                         }
                     }
                     .padding(.horizontal, (outer.size.width - cardWidth) / 2)
                     .background(
                         GeometryReader { geo in
-                            Color.clear.preference(key: ScrollOffsetKey.self, value: -geo.frame(in: .named("scroll")).origin.x)
+                            Color.clear.preference(
+                                key: ScrollOffsetKey.self,
+                                value: -geo.frame(in: .named("scroll")).origin.x
+                            )
                         }
                     )
                 }
@@ -48,7 +41,9 @@ struct CarouselView: View {
                 .onPreferenceChange(ScrollOffsetKey.self) { value in
                     scrollOffset = value
                 }
-                .onAppear { Task { await viewModel.fetchPokemon() } }
+                .onAppear {
+                    Task { await viewModel.fetchPokemon() }
+                }
             }
             .navigationTitle("Carousel")
         }
@@ -56,10 +51,36 @@ struct CarouselView: View {
 
     /// Background color interpolated from the current scroll position.
     private var backgroundColor: Color {
-        guard !viewModel.pokemon.isEmpty else { return Color(.systemBackground) }
+        guard !viewModel.pokemon.isEmpty else {
+            return Color(.systemBackground)
+        }
         let total = cardWidth * CGFloat(viewModel.pokemon.count)
         let hue = Double((scrollOffset / total).truncatingRemainder(dividingBy: 1))
         return Color(hue: hue, saturation: 0.4, brightness: 1)
+    }
+}
+
+private struct CarouselCardContainer: View {
+    let pokemon: Pokemon
+    let outerCenterX: CGFloat
+    let cardWidth: CGFloat
+
+    var body: some View {
+        GeometryReader { geo in
+            let frame = geo.frame(in: .global)
+            let distance = abs(frame.midX - outerCenterX)
+            let progress = min(distance / UIScreen.main.bounds.width, 1)
+            let offsetY = progress * 200
+            let scale = 1 - progress * 0.2
+
+            NavigationLink(value: pokemon) {
+                CarouselCardView(pokemon: pokemon)
+                    .offset(y: offsetY)
+                    .scaleEffect(scale)
+                    .opacity(Double(1 - progress * 0.5))
+            }
+            .buttonStyle(.plain)
+        }
     }
 }
 
@@ -87,7 +108,6 @@ private struct CarouselCardView: View {
     }
 }
 
-/// Preference key used to pass the horizontal scroll offset up the view hierarchy.
 private struct ScrollOffsetKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {

@@ -20,6 +20,7 @@ struct AboutView: View {
             .padding()
         }
         .navigationTitle("About")
+
     }
 }
 

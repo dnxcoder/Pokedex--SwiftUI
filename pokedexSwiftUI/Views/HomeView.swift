@@ -24,7 +24,7 @@ struct HomeView: View {
     var body: some View {
         List(viewModel.pokemon) { pokemon in
             NavigationLink(value: pokemon) {
-                HStack {
+                HStack{
                     AsyncImage(url: pokemon.imageURL) { image in
                         image.resizable()
                             .aspectRatio(contentMode: .fit)
@@ -35,9 +35,12 @@ struct HomeView: View {
                     Text(pokemon.name)
                         .font(.headline)
                         .fontWeight(.semibold)
+                        .foregroundColor(.black)
+                    Spacer()
                 }
-                .padding(8)
+                .frame(maxWidth: .infinity)
                 .background(RoundedRectangle(cornerRadius: 8).fill(color(for: pokemon.primaryType)))
+                //.padding(Edge.leading)
             }
         }
         .listStyle(.plain)
